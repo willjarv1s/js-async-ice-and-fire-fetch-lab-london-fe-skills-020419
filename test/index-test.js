@@ -1,48 +1,25 @@
-const expect = require('expect')
-const fs = require('fs')
-const jsdom = require('jsdom')
-const path = require('path')
+const sinon = require( 'sinon' );
 
-describe('index', () => {
-  before(done => {
-    const html = path.resolve(__dirname, '..', 'index.html')
-    const src = path.resolve(__dirname, '..', 'index.js')
+const helpers = require( './helpers' );
+const chai = require( 'chai' );
+const spies = require( 'chai-spies' );
 
-    jsdom.env(html, [src], (err, window) => {
-      if (err) {
-        return done(err)
-      }
-
-      Object.keys(window).forEach(key => {
-        global[key] = window[key]
-      })
-
-      done()
-    })
-  })
+chai.use( spies );
 
 
+describe( "index.js", () => {
+  describe( 'getPosts()', () => {
 
-  describe('index.js', () => {
-    let fetchSpy
-    before(() => {
-      window.fetch = require('node-fetch')
-    })
+    beforeEach( () => {
+      window.document.body.innerHTML = '<main></main>'
+      window.fetch = require( 'node-fetch' );
+      chai.spy.on( window, 'fetch' );
+    } );
 
-    beforeEach(() => {
-      fetchSpy = expect.spyOn(window, "fetch").andReturn(new Promise(() => {}))
-    })
-
-    afterEach(() => {
-      fetchSpy.restore()
-    })
-
-    it('fetches the correct API URL', () => {
-      fetchBooks()
-      expect(fetchSpy.calls[0]).toNotBe(undefined, "fetch() was not called")
-      const url = fetchSpy.calls[0].arguments[0]
-      expect(url).toMatch('https://anapioficeandfire.com/api/books')
-    })
-
-  })
+    it( "sends a fetch request to 'https://anapioficeandfire.com/api/books'", async () => {
+      await fetchBooks()
+      expect( window.fetch, "A fetch to the API was not found" )
+        .to.have.been.called.with( 'https://anapioficeandfire.com/api/books' );
+    } )
+  } )
 })
