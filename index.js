@@ -1,5 +1,5 @@
 function fetchBooks() {
-  //write fetch request to the Game of Thrones API
+  
 }
 
 function renderBooks(json) {
